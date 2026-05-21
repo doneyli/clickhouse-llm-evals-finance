@@ -1,25 +1,28 @@
 # Langfuse v3 self-host stack for the LLM Certification project.
 #
-# This file is a copy of the official Langfuse v3 docker-compose
-# (https://github.com/langfuse/langfuse/blob/main/docker-compose.yml) with the
-# image tags pinned to the major v3 line. It is intended for local evaluation
-# of the certification pipeline against a self-hosted Langfuse — not for
-# production deployments.
+# Vendored from the official Langfuse v3 docker-compose
+# (https://github.com/langfuse/langfuse/blob/main/docker-compose.yml).
+# The Langfuse app images are pinned to the major v3 line; ClickHouse and MinIO
+# follow upstream's unpinned defaults. Intended for local evaluation, not
+# production — see https://langfuse.com/self-hosting for hardened deployments.
 #
-# Quick start:
-#   cd selfhost
-#   docker compose -f docker-compose.langfuse.yml up -d
+# Network exposure: only `langfuse-web` (port 3000) and `minio` (port 9090)
+# bind on all interfaces. Postgres, ClickHouse, Redis, the worker, and the
+# MinIO console bind to 127.0.0.1 only. Restrict host firewall accordingly if
+# the host is reachable beyond localhost.
+#
+# Quick start (from repo root):
+#   docker compose -f selfhost/docker-compose.yml up -d
 #   # Open http://localhost:3000, create an org + project, copy the API keys
-#   # into ../.env (LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY).
-#   # Set LANGFUSE_BASE_URL=http://localhost:3000 in ../.env.
+#   # into .env (LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY).
+#   # Set LANGFUSE_BASE_URL=http://localhost:3000 in .env.
 #
 # Stop / reset:
-#   docker compose -f docker-compose.langfuse.yml down            # stop, keep data
-#   docker compose -f docker-compose.langfuse.yml down -v         # stop + wipe volumes
+#   docker compose -f selfhost/docker-compose.yml down       # stop, keep data
+#   docker compose -f selfhost/docker-compose.yml down -v    # stop + wipe volumes
 #
 # Update the credential placeholders marked with `# CHANGEME` before exposing
-# this stack to anything beyond your laptop. For production self-hosting, see
-# https://langfuse.com/self-hosting.
+# this stack to anything beyond your laptop.
 
 services:
   langfuse-worker:

@@ -63,31 +63,34 @@ either deployment. Pick one before running Quick Start.
    <https://us.cloud.langfuse.com/auth/sign-up> (US).
 2. Create an **Organization → Project**.
 3. **Settings → API Keys → Create new API keys**. Copy the public + secret keys.
-4. You'll paste these into `.env` in [Quick Start step 1](#1-setup). The
-   `LANGFUSE_BASE_URL` already defaults to `https://cloud.langfuse.com`; change
-   to `https://us.cloud.langfuse.com` if you signed up in the US region.
+4. Paste them into `.env` (created in [Quick Start step 1](#1-setup)). The
+   `LANGFUSE_BASE_URL` already defaults to `https://cloud.langfuse.com`;
+   uncomment the US-region line in `.env.example` if you signed up there.
 
 ### Option B — Self-host Langfuse
 
-The repo ships a curated Docker Compose stack pinned to Langfuse v3:
+The repo ships a curated Docker Compose stack with Langfuse pinned to v3. From
+the repo root:
 
 ```bash
-cd selfhost
-docker compose -f docker-compose.langfuse.yml up -d
+docker compose -f selfhost/docker-compose.yml up -d
 # Open http://localhost:3000 → sign up → create Organization + Project →
-# Settings → API Keys → copy keys
-cd ..
+# Settings → API Keys → Create new API keys
 ```
 
-Then in [Quick Start step 1](#1-setup) set:
+Then in [Quick Start step 1](#1-setup), uncomment the self-hosted line in
+`.env.example` (and comment the Cloud default) so `.env` ends up with:
 
 ```bash
 LANGFUSE_BASE_URL=http://localhost:3000
 ```
 
 See [`selfhost/README.md`](selfhost/README.md) for stop/reset commands,
-security notes (placeholder credentials to rotate), and pointers to production
-self-hosting via Kubernetes.
+network-exposure guidance, credential rotation, and pointers to production
+self-hosting via Kubernetes. If you plan to run the full 150-item FinanceBench
+dataset against a local stack, also read
+[Troubleshooting: hangs on long runs](#troubleshooting-hangs-on-long-runs) —
+local Langfuse can saturate the OTel queue on long, CoT-heavy runs.
 
 > **Recommendation:** start with Cloud's free tier to get the pipeline running
 > end-to-end, then move to self-hosted if compliance or data-residency
@@ -104,8 +107,9 @@ cd langfuse-llm-certification-finance
 cp .env.example .env    # Edit with your Langfuse + LLM API credentials
 ```
 
-> The `.env.example` covers both deployment options — uncomment the
-> `LANGFUSE_BASE_URL` line that matches your choice from
+> The `.env.example` lists three `LANGFUSE_BASE_URL` options (Cloud EU, Cloud
+> US, self-hosted) — uncomment exactly one and comment the others before
+> running anything. See
 > [Choose your Langfuse deployment](#choose-your-langfuse-deployment).
 
 **Install dependencies** (choose one):
@@ -634,7 +638,7 @@ Some metrics can also be visualized using [Langfuse Custom Dashboards](https://l
 |----------|----------|---------|-------------|
 | `LANGFUSE_PUBLIC_KEY` | Yes | — | Langfuse project public key |
 | `LANGFUSE_SECRET_KEY` | Yes | — | Langfuse project secret key |
-| `LANGFUSE_BASE_URL` | No | `https://cloud.langfuse.com` | Langfuse instance URL |
+| `LANGFUSE_BASE_URL` | No | `https://cloud.langfuse.com` | Langfuse instance URL — Cloud (EU/US) or self-hosted (typically `http://localhost:3000`). See [Choose your Langfuse deployment](#choose-your-langfuse-deployment). |
 | `ANTHROPIC_API_KEY` | For Claude models | — | Anthropic API key for Claude models |
 | `LLM_API_KEY` | For OpenAI models | — | OpenAI-compatible API key |
 | `LLM_BASE_URL` | No | `https://api.openai.com/v1` | LLM API base URL |
