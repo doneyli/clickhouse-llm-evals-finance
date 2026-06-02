@@ -6,6 +6,11 @@
 > certified only if the **whole system** clears every production-readiness bar at
 > once — not just "did the model get the number right."
 
+**Related docs:** [`usecase-architecture.md`](usecase-architecture.md) (architecture
++ eval-lifecycle component map) · [`usecase-runbook.md`](usecase-runbook.md)
+(runbook + demo narration) · [`../scripts/demo_usecase.sh`](../scripts/demo_usecase.sh)
+(runnable demo scaffold).
+
 This is the implementation specification for three certifiable agents plus the
 shared foundation they sit on. It is written to be handed to an implementer: each
 section lists files, function signatures, trace structure, dependencies, and
