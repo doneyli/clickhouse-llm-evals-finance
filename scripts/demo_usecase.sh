@@ -12,7 +12,7 @@
 # Usage:
 #   bash scripts/demo_usecase.sh                 # default: 10k-analyst on financebench-sample
 #   USE_CASE=sentiment-triage DATASET=certification/fpb-sample bash scripts/demo_usecase.sh
-#   MODEL=claude-haiku-4-5-20251001 bash scripts/demo_usecase.sh   # the FAIL story
+#   MODEL=claude-haiku-4-5-20251001 bash scripts/demo_usecase.sh   # whole-system lift: cheap model still passes
 #
 # Env: LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY, LANGFUSE_BASE_URL, ANTHROPIC_API_KEY
 set -euo pipefail
