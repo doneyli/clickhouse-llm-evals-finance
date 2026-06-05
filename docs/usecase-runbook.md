@@ -47,8 +47,10 @@ uv run python setup_annotation_queues.py
 
 **Verify in the Langfuse UI:**
 - **Datasets** → `certification/financebench-sample`, `certification/fpb-sample`
-- **Prompts** → `usecase-10k-analyst-plan`, `-compose`, `usecase-sentiment-classify`,
-  `usecase-advisory-analyze`, `usecase-advisory-draft` (all `production`-labelled)
+- **Prompts** → `usecase-10k-analyst-compose`, `usecase-sentiment-classify`,
+  `usecase-advisory-analyze`, `usecase-advisory-draft` (all `production`-labelled).
+  Note: the 10-K Analyst's plan/extract prompts are code-owned (parsed JSON), so
+  only its free-form `compose` step is managed here.
 - **Settings → Score Configs** → `tool_use_correctness` present
 - **Annotation Queues** → `Certification Review`
 

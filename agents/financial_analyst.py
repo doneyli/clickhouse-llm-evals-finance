@@ -42,7 +42,6 @@ from agents.base import (
 from cert_common import get_managed_prompt
 from evaluators import (
     numerical_accuracy_evaluator,
-    exact_match_evaluator,
     groundedness_evaluator,
     regulatory_compliance_evaluator,
     tool_use_correctness_evaluator,
@@ -258,9 +257,12 @@ GATE_10K_ANALYST = {
     "tool_use_correctness": 0.90,  # numerical Qs actually used the calculator
 }
 
+# Note: exact_match is intentionally excluded — strict string containment is
+# near-useless for numerical/derived answers (it scored ~40% while the gate
+# passed, prompting "why?" on the breakdown page). numerical_accuracy covers
+# correctness; groundedness covers faithfulness.
 ITEM_EVALUATORS = [
     numerical_accuracy_evaluator,
-    exact_match_evaluator,
     groundedness_evaluator,
     regulatory_compliance_evaluator,
     tool_use_correctness_evaluator,
