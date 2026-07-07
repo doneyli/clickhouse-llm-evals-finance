@@ -249,7 +249,7 @@ CLI mirroring `run_certification.py` but agent-aware. Key differences only:
 Behavior:
 
 1. `uc = AGENT_REGISTRY[args.use_case]`; build `task = uc["fn"](model=args.model, ...)`.
-2. Item evaluators: `[numerical_accuracy, exact_match, groundedness,
+2. Item evaluators: `[numerical_accuracy, groundedness,
    regulatory_compliance, tool_use_correctness]` for 10k-analyst;
    per-agent set defined in each agent module and exposed as `ITEM_EVALUATORS`.
 3. Run evaluators: `[average_score_evaluator(d) for d in gate dims] + [uc["gate"]]`.
@@ -366,10 +366,16 @@ GATE_10K_ANALYST = usecase_certification_gate({
     "regulatory_compliance":  1.00,   # zero prohibited phrases
     "tool_use_correctness":   0.90,   # numerical Qs actually used the calculator
 })
-ITEM_EVALUATORS = [numerical_accuracy_evaluator, exact_match_evaluator,
+ITEM_EVALUATORS = [numerical_accuracy_evaluator,
                    groundedness_evaluator, regulatory_compliance_evaluator,
                    tool_use_correctness_evaluator]
 ```
+
+> `exact_match_evaluator` is intentionally **excluded** from the 10-K Analyst's
+> `ITEM_EVALUATORS`: strict string containment is near-useless for numerical/derived
+> answers (it scored ~40% while the gate passed). `numerical_accuracy` covers
+> correctness and `groundedness` covers faithfulness. See the comment in
+> `agents/financial_analyst.py`.
 
 ### 4.5 Acceptance criteria
 

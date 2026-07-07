@@ -53,13 +53,19 @@ from evaluators import (
 _OPS = {
     ast.Add: operator.add, ast.Sub: operator.sub,
     ast.Mult: operator.mul, ast.Div: operator.truediv,
-    ast.Pow: operator.pow, ast.USub: operator.neg, ast.UAdd: operator.pos,
+    ast.USub: operator.neg, ast.UAdd: operator.pos,
 }
 
 
 def safe_eval(expr: str) -> float:
-    """Evaluate a pure arithmetic expression (+ - * / ** and parens) with no
-    names, calls, or attribute access. Never uses Python eval()."""
+    """Evaluate a pure arithmetic expression (+ - * / and parens) with no names,
+    calls, or attribute access. Never uses Python eval().
+
+    Exponentiation (``**``) is intentionally unsupported: it is not needed for the
+    ratios/averages/YoY changes the agent computes (and the extract prompt only
+    emits + - * / ( )), while ``9**9**9`` would compute a multi-gigabyte integer
+    and hang the worker before the calculate step's try/except could catch it.
+    """
     def _ev(node):
         if isinstance(node, ast.Expression):
             return _ev(node.body)
@@ -80,18 +86,28 @@ def safe_eval(expr: str) -> float:
 
 def _parse_json(text: str, default: dict) -> dict:
     """Parse a JSON object from an LLM response, tolerating markdown fences and
-    surrounding prose. Falls back to `default` on failure."""
+    surrounding prose. Falls back to `default` on failure.
+
+    Always returns a dict: if the model emits valid-but-non-object JSON (e.g. a
+    top-level array or scalar), that is treated as a parse failure so callers can
+    safely ``.get(...)`` the result without an AttributeError.
+    """
     if not text:
         return dict(default)
     try:
-        return json.loads(text)
+        parsed = json.loads(text)
+        if isinstance(parsed, dict):
+            return parsed
     except Exception:
-        m = re.search(r"\{.*\}", text, re.S)
-        if m:
-            try:
-                return json.loads(m.group(0))
-            except Exception:
-                pass
+        pass
+    m = re.search(r"\{.*\}", text, re.S)
+    if m:
+        try:
+            parsed = json.loads(m.group(0))
+            if isinstance(parsed, dict):
+                return parsed
+        except Exception:
+            pass
     return dict(default)
 
 

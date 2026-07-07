@@ -34,6 +34,8 @@ class TestSafeEval:
         "revenue / ppe",          # names not allowed
         "open('x')",
         "1 if True else 2",
+        "2 ** 3",                 # exponentiation intentionally unsupported (DoS guard)
+        "9 ** 9 ** 9",            # would hang the worker if Pow were allowed
     ])
     def test_rejects_non_arithmetic(self, expr):
         with pytest.raises(Exception):
@@ -54,6 +56,12 @@ class TestParseJson:
 
     def test_default_on_garbage(self):
         assert _parse_json("not json at all", {"fallback": True}) == {"fallback": True}
+
+    def test_default_on_non_object_json(self):
+        # Valid JSON but not an object -> treated as a parse failure so callers can
+        # safely .get() the result (no AttributeError on a list/scalar).
+        assert _parse_json("[1, 2, 3]", {"fallback": True}) == {"fallback": True}
+        assert _parse_json("42", {"fallback": True}) == {"fallback": True}
 
 
 # --------------- Agent task (LLM monkeypatched) ---------------
