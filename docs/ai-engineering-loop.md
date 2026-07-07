@@ -91,9 +91,9 @@ reviewer opens:
 ```
 usecase:10k-analyst                                   (trace = one dataset item)
 ├── plan               generation   "CALCULATE: revenue / avg PP&E"
-├── retrieve-evidence  span          └─ extract  generation → {operands, citations}
+├── retrieve-evidence  span          └─ extract-operands  generation → {operands, citations}
 ├── calculate          tool          in "6489/((253+282)/2)"  out 24.26
-└── compose            generation    grounded, cited answer
+└── compose-answer     generation    grounded, cited answer
 ```
 
 `agents/base.py` provides `traced_generation` / `traced_span` / `traced_tool`;
@@ -116,8 +116,11 @@ traffic (not the eval set): it fetches recent traces, runs the deterministic
 the scores back, and **exits non-zero on a compliance violation** so it wires into
 alerting. For subjective drift (groundedness, helpfulness) you add a Langfuse
 **LLM-as-a-Judge** evaluator on Live Observations directly in the UI, sampled to
-manage cost. Failing items can also be routed to the **Certification Review**
-annotation queue (`cert_common.queue_failed_items`) for human sign-off.
+manage cost. Human sign-off happens through the **Certification Review**
+annotation queue — but note that queue is populated by the *offline* certification
+runner (`--queue-failures` → `cert_common.queue_failed_items`), **not** by
+`monitor_production.py`; wiring live-monitored violations into it is part of the
+open feedback edge ([Edge A](#closing-the-loop-what-is-wired-vs-open)).
 
 **Langfuse primitive:** Scores on production traces + online LLM-as-a-judge +
 annotation queues. **See it:** UI → **Tracing**/**Scores**, and **Annotation
@@ -205,12 +208,17 @@ the output of one cycle into the input of the next. Per the goal, these are
 **The loop's promise:** a failure surfaced in production becomes a repeatable test
 case, so you never regress on it again.
 
-**What's wired:** `monitor_production.py` scores live traces and flags violations;
-`queue_failed_items` routes failing traces into the **Certification Review**
-annotation queue for a human.
+**What's wired:** `monitor_production.py` scores live traces and flags violations
+(alerting via a non-zero exit). *Separately*, the **offline** certification runner
+routes failing items into the **Certification Review** annotation queue
+(`queue_failed_items`, via `--queue-failures`) — that path runs on `run_experiment`
+results, **not** on the live traces `monitor_production.py` sees. So the two
+mechanisms exist, but they are not connected to each other.
 
-**What's open:** there is **no automated path from a flagged/annotated trace to a
-new golden dataset item.** Today that promotion is a manual step (copy the failing
+**What's open:** two links are missing. (1) `monitor_production.py` does not route a
+live violation into the annotation queue — it only scores and exits. (2) More
+importantly, there is **no automated path from a flagged/annotated trace to a new
+golden dataset item.** Today that promotion is a manual step (copy the failing
 trace's input/expected into a dataset via the UI or `setup_datasets.py`). The clean
 closure — "annotate a queued trace → one click adds it to
 `certification/financebench-sample` → next experiment includes it" — is a
