@@ -10,6 +10,11 @@ how to verify it.
 > `doneyli/langfuse-llm-certification-finance`; the Langfuse base URL is whatever
 > your `.env` `LANGFUSE_BASE_URL` points at (Cloud or self-hosted).
 
+> **Note:** the repo's tests are **offline** (mocked). Working through §3–§4 below
+> is therefore also the **first end-to-end run of the feedback edges against a live
+> Langfuse** — i.e. this checklist is what promotes edges A/B from "implemented" to
+> "verified". Watch for the verifications called out in each section.
+
 ---
 
 ## 0. Prerequisites
