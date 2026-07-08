@@ -300,7 +300,8 @@ prompt change, not just on a code push.
 - 🟡 **One-time Langfuse config to activate.** Create the matching automation in
   **Prompts → Automations → GitHub Repository Dispatch** (event type
   `langfuse-prompt-update`, a GitHub PAT with `actions` read/write) — UI + secret,
-  not code. Until then the receiver simply never fires.
+  not code. Until then the receiver simply never fires. Step-by-step in the
+  [activation checklist](loop-activation-checklist.md) (§3).
 - ⬜ **Sync-to-Repo webhook** (the git audit archive of prompt versions) is not set
   up — that path needs a small webhook server (see the Langfuse docs).
 
@@ -337,8 +338,10 @@ narration:
    accurate, but one prohibited phrase → compliance < 100% → **gate FAILS**.
    *Accurate but uncertifiable.*
 5. **Monitor + close the loop** — point at `monitor_production.py` on live traffic,
-   then name the two open edges above as the "make it continuous / make it CI/CD"
-   next steps.
+   then show both feedback edges: a flagged trace → `promote_trace_to_dataset.py` →
+   golden data (Edge A), and a prompt promotion → auto re-certification (Edge B).
+   Both are wired; activating them is a one-time console step
+   ([activation checklist](loop-activation-checklist.md)).
 
 ## How this doc relates to the others
 
@@ -348,3 +351,4 @@ narration:
 | [`usecase-architecture.md`](usecase-architecture.md) | *What are the components and where does each live?* |
 | [`usecase-certification.md`](usecase-certification.md) | *How is each agent implemented?* |
 | [`usecase-runbook.md`](usecase-runbook.md) | *How do I run and demo it?* |
+| [`loop-activation-checklist.md`](loop-activation-checklist.md) | *What one-time console/config turns the feedback edges on?* |
