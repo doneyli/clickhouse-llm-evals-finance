@@ -700,7 +700,7 @@ single accuracy score.
 
 | Use case | Agent steps (spans) | Gate — all must pass |
 |----------|--------------------|----------------------|
-| `10k-analyst` — grounded SEC-filing QA with a calculator tool | plan → retrieve-evidence → calculate (tool) → compose | numerical_accuracy ≥ 0.85, groundedness ≥ 0.80, regulatory_compliance = 1.00, tool_use_correctness ≥ 0.90 |
+| `10k-analyst` — grounded SEC-filing QA with a calculator tool | plan → retrieve-evidence → calculate (tool) → compose-answer | numerical_accuracy ≥ 0.85, groundedness ≥ 0.80, regulatory_compliance = 1.00, tool_use_correctness ≥ 0.90 |
 | `sentiment-triage` — classify sentiment, route low-confidence items to a human | classify → rationale → route (tool) | sentiment_accuracy ≥ 0.85, regulatory_compliance = 1.00, tool_use_correctness = 1.00 |
 | `advisory-draft` — grounded client summary with a hard compliance gate | analyze → draft → compliance-self-check (tool) | groundedness ≥ 0.80, regulatory_compliance = 1.00, completeness ≥ 0.70, tool_use_correctness = 1.00 |
 
