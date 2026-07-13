@@ -183,11 +183,6 @@ class PortalClient:
         return index
 
     @staticmethod
-    def _primary_score_name(dataset_name):
-        is_sentiment = "fpb" in dataset_name.lower()
-        return "sentiment_accuracy" if is_sentiment else "numerical_accuracy"
-
-    @staticmethod
     def _pick_primary_score(cert):
         """Pick a run's primary score via the documented fallback chain.
 
@@ -383,6 +378,9 @@ class PortalClient:
 
         items_data = []
         score_totals = {}
+        # Run-level scores (certification_result + avg_*) ride on the first
+        # experiment trace (see cert_common.persist_run_evaluations).
+        run_scores = {}
 
         for ri in run_items:
             trace_id = ri.get("traceId", "")
@@ -394,7 +392,11 @@ class PortalClient:
             trace = self._get_trace(trace_id) if trace_id else None
             for s in (trace or {}).get("scores", []) or []:
                 sname = s.get("name")
-                if not sname or sname in RUN_LEVEL_SCORES or sname.startswith("avg_"):
+                if not sname:
+                    continue
+                if sname in RUN_LEVEL_SCORES or sname.startswith("avg_"):
+                    if s.get("value") is not None:
+                        run_scores.setdefault(sname, s.get("value"))
                     continue
                 sval = s.get("value")
                 item_scores[sname] = {
@@ -435,13 +437,25 @@ class PortalClient:
                     ),
                 }
 
-        primary_name = self._primary_score_name(dataset_name)
-        primary_agg = aggregates.get(primary_name, {})
-        if primary_agg:
-            threshold = meta.get("threshold", 0.85)
-            status = "PASSED" if primary_agg["mean"] >= threshold else "FAILED"
+        cert_value = run_scores.get("certification_result")
+        if cert_value is not None:
+            # Same source of truth as the dashboard/history status, so a run
+            # never shows PASSED on one page and UNKNOWN on another.
+            status = "PASSED" if cert_value == 1.0 else "FAILED"
         else:
-            status = "UNKNOWN"
+            # Older runs without a persisted gate score: judge the first
+            # item-level score from the primary chain against the threshold.
+            item_chain = [n.removeprefix("avg_") for n in PRIMARY_SCORE_CHAIN]
+            primary_name = next(
+                (n for n in item_chain if n in aggregates),
+                min(set(aggregates) - set(item_chain), default=None),
+            )
+            primary_agg = aggregates.get(primary_name) if primary_name else None
+            if primary_agg:
+                threshold = meta.get("threshold", 0.85)
+                status = "PASSED" if primary_agg["mean"] >= threshold else "FAILED"
+            else:
+                status = "UNKNOWN"
 
         all_score_names = sorted(set(
             name for item in items_data for name in item["scores"]
