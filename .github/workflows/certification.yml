@@ -7,7 +7,7 @@ on:
       model:
         description: 'Model to certify'
         required: false
-        default: 'claude-haiku-4-5-20251001'
+        default: 'claude-sonnet-4-6'
       threshold:
         description: 'Pass threshold (0.0-1.0)'
         required: false
@@ -52,7 +52,7 @@ jobs:
         run: |
           uv run python run_certification.py \
             --dataset certification/financebench-sample \
-            --model ${{ github.event.inputs.model || 'claude-haiku-4-5-20251001' }} \
+            --model ${{ github.event.inputs.model || 'claude-sonnet-4-6' }} \
             --threshold ${{ github.event.inputs.threshold || '0.85' }} \
             --ci
 
@@ -73,7 +73,7 @@ jobs:
         run: |
           uv run python run_certification.py \
             --dataset certification/fpb-sample \
-            --model ${{ github.event.inputs.model || 'claude-haiku-4-5-20251001' }} \
+            --model ${{ github.event.inputs.model || 'claude-sonnet-4-6' }} \
             --threshold ${{ github.event.inputs.threshold || '0.85' }} \
             --ci
 
@@ -115,6 +115,6 @@ jobs:
 
       - name: Run certification tests
         env:
-          CERT_MODEL: ${{ github.event.inputs.model || 'claude-haiku-4-5-20251001' }}
+          CERT_MODEL: ${{ github.event.inputs.model || 'claude-sonnet-4-6' }}
           CERT_THRESHOLD: ${{ github.event.inputs.threshold || '0.85' }}
         run: uv run pytest tests/test_certification.py -v --tb=short

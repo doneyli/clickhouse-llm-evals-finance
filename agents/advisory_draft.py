@@ -191,6 +191,6 @@ register_agent(
     fn=run_advisory_draft,
     gate_thresholds=GATE_ADVISORY_DRAFT,
     item_evaluators=ITEM_EVALUATORS,
-    dataset_hint="financebench",
+    dataset_hint="advisory-adversarial",
     description="Client Advisory Drafting — grounded client summary with a hard compliance gate",
 )

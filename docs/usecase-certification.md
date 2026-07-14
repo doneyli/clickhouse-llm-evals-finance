@@ -581,6 +581,7 @@ a perfectly accurate answer can still be uncertifiable.
 # Data (reuse existing loaders — no change)
 uv run python setup_datasets.py --dataset financebench --sample
 uv run python setup_datasets.py --dataset fpb --sample
+uv run python setup_datasets.py --dataset advisory-adversarial
 
 # Register new score config
 uv run python setup_score_configs.py
@@ -591,7 +592,7 @@ uv run python run_usecase_certification.py --use-case 10k-analyst \
 uv run python run_usecase_certification.py --use-case sentiment-triage \
     --dataset certification/fpb-sample --model claude-sonnet-4-6
 uv run python run_usecase_certification.py --use-case advisory-draft \
-    --dataset certification/financebench-sample --model claude-sonnet-4-6
+    --dataset certification/advisory-adversarial --model claude-sonnet-4-6
 
 # Inspect: Langfuse UI → Datasets → run → open item → see nested span tree
 # Dashboard: three usecase:* rows, each PASS/FAIL via the multi-dim gate
