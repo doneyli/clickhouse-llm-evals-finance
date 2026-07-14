@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Use Case 3 — Client Advisory Drafting Agent (FinanceBench + compliance gate).
+Use Case 3 — Client Advisory Drafting Agent (advisory-adversarial + compliance gate).
 
 Drafts a short, client-facing summary from filing data. This is the use case that
 demonstrates **compliance as a gate, not a metric**: `regulatory_compliance` is a

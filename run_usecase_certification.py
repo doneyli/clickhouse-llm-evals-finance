@@ -55,9 +55,19 @@ from evaluators import average_score_evaluator, usecase_certification_gate
 from cert_common import persist_run_evaluations, queue_failed_items
 
 # All three agents ship registered. The list stays separate from AGENT_REGISTRY
-# because the agents package tolerates a failed agent-module import (the CLI can
-# then still --list and report the broken agent instead of crashing at import).
+# because the agents package tolerates a *missing* agent module file
+# (ModuleNotFoundError for the module itself — see agents/__init__.py), so the
+# CLI can still --list and report the gap. Any other import-time error inside an
+# agent module propagates loudly by design.
 KNOWN_USE_CASES = ["10k-analyst", "sentiment-triage", "advisory-draft"]
+
+# Module implementing each use case, for the debug hints below — slugs do not
+# map 1:1 to module names (10k-analyst lives in financial_analyst).
+_AGENT_MODULE = {
+    "10k-analyst": "agents.financial_analyst",
+    "sentiment-triage": "agents.sentiment_triage",
+    "advisory-draft": "agents.advisory_draft",
+}
 
 
 # --------------- CLI ---------------
@@ -99,9 +109,9 @@ def list_use_cases():
             print(f"               dataset hint: {entry['dataset_hint']}", file=sys.stderr)
             print(f"               gate: {dims}", file=sys.stderr)
         else:
-            print(f"  [unavailable] {name:18s} agent module failed to load — "
-                  f"check `python -c 'import agents.{name.replace('-', '_')}'` "
-                  f"for the import error", file=sys.stderr)
+            print(f"  [unavailable] {name:18s} agent module missing or not "
+                  f"registered — check `python -c 'import "
+                  f"{_AGENT_MODULE.get(name, 'agents')}'`", file=sys.stderr)
 
 
 # --------------- Annotation queue routing ---------------
@@ -142,9 +152,10 @@ def main():
     entry = AGENT_REGISTRY.get(args.use_case)
     if entry is None:
         print(f"Error: use case '{args.use_case}' is not registered — its agent "
-              f"module failed to import.\n"
+              f"module is missing or did not self-register.\n"
               f"  Run with --list to see what is registered, or check the import "
-              f"directly: python -c 'import agents.{args.use_case.replace('-', '_')}'",
+              f"directly: python -c 'import "
+              f"{_AGENT_MODULE.get(args.use_case, 'agents')}'",
               file=sys.stderr)
         sys.exit(1)
 

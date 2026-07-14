@@ -171,7 +171,7 @@ from agents.advisory_draft import run_advisory_draft, GATE_ADVISORY_DRAFT
 AGENT_REGISTRY = {
     "10k-analyst":      {"fn": run_10k_analyst,      "gate": GATE_10K_ANALYST,      "dataset_hint": "financebench"},
     "sentiment-triage": {"fn": run_sentiment_triage, "gate": GATE_SENTIMENT_TRIAGE, "dataset_hint": "fpb"},
-    "advisory-draft":   {"fn": run_advisory_draft,   "gate": GATE_ADVISORY_DRAFT,   "dataset_hint": "financebench"},
+    "advisory-draft":   {"fn": run_advisory_draft,   "gate": GATE_ADVISORY_DRAFT,   "dataset_hint": "advisory-adversarial"},
 }
 ```
 
@@ -483,7 +483,7 @@ ITEM_EVALUATORS = [sentiment_evaluator, regulatory_compliance_evaluator,
 
 ---
 
-## 6. Agent 3 — Client Advisory Drafting (FinanceBench + compliance)
+## 6. Agent 3 — Client Advisory Drafting (advisory-adversarial + compliance)
 
 **Business purpose:** drafts a client-facing summary from filing data. Here
 `regulatory_compliance` is a **hard gate dimension** (threshold = 1.00) — a draft

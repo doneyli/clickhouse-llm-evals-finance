@@ -37,9 +37,12 @@ active_profile() {
 }
 
 describe() {  # $1 = profile
-  local url
-  url="$(grep -E '^LANGFUSE_BASE_URL=' ".env.$1" | head -1 | cut -d= -f2-)"
-  echo "active Langfuse env: $1  (LANGFUSE_BASE_URL=${url:-unset})"
+  # `|| true` keeps set -e from silently killing the script when the profile
+  # has no matching line (grep exits 1 on no match). LANGFUSE_HOST is the
+  # alias cert_common.py honors as a fallback.
+  local line
+  line="$(grep -E '^LANGFUSE_(BASE_URL|HOST)=' ".env.$1" | head -1 || true)"
+  echo "active Langfuse env: $1  (${line:-LANGFUSE_BASE_URL=unset})"
 }
 
 switch_to() {  # $1 = profile
