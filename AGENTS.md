@@ -52,18 +52,22 @@ answers) before you run anything. **Do not proceed past a failing preflight.**
 
 | Step | Command | Precondition | Success check |
 |---|---|---|---|
-| Install | `make install` | Python ≥ 3.11, `uv` (or use `PY=python`) | `uv sync` exits 0 |
+| Install | `make install` | Python ≥ 3.11 (`uv`, or `PY=python` for pip) | deps installed (`uv sync`, or `pip install -r requirements.txt`) |
 | Preflight | `make preflight` | `.env` filled (both `HUMAN STEP`s done) | `RESULT: READY`, exit 0 |
 | Seed | `make seed` | preflight READY | scripts print created datasets/configs/queues/prompts |
 | Model gate | `make gate` | seed done | stdout shows `PASS`/`FAIL`; run appears in Langfuse → Datasets → Runs |
-| Agent gate | `make agent-gate` | seed done + `ANTHROPIC_API_KEY` | per-dimension PASS/FAIL; `usecase:10k-analyst` row |
+| Agent gate | `make agent-gate` (dataset auto-routes per `USE_CASE`) | seed done + `ANTHROPIC_API_KEY` | per-dimension PASS/FAIL; `usecase:<name>` row |
 | Portal | `make portal` | Node 20+/npm 10+ (frontend builds once) | dashboard at <http://localhost:8050> |
 | Evidence | `make export` | a completed run | markdown evidence pack on stdout |
 
 **Ordering that matters** (already encoded in `make seed`, but do not reorder if
 you run scripts by hand):
 - `setup_score_configs.py` **before** `setup_annotation_queues.py` (queues bind to score configs).
-- Datasets must be loaded **before** a gate run.
+- Datasets must be loaded **before** a gate run (`make seed` loads all three golden sets).
+- Each agent gates against its **own** dataset — `make agent-gate` auto-routes it:
+  `10k-analyst`→`certification/financebench-sample`, `sentiment-triage`→`certification/fpb-sample`,
+  `advisory-draft`→`certification/advisory-adversarial` (advisory-draft can *only* pass on the
+  adversarial set — never FinanceBench). Override with `DATASET=...` if needed.
 - The portal frontend must be **built** before launch (the `portal` target builds it once into `portal/frontend/dist`).
 
 ## Deployment choice: Cloud vs self-hosted
@@ -113,10 +117,11 @@ Use these to answer "did the gate run actually land?" — e.g. after `make gate`
 
 ## Gotchas (read before editing env or running long jobs)
 
-- **`.env` is a symlink** to `.env.local`, and every script loads it with
-  `override=True` (the file wins over shell vars). To keep Cloud and local
-  profiles side by side, use `bash scripts/use_env.sh {status|cloud|local|both}`
-  rather than editing the symlink target directly.
+- **`.env` loading.** Every script loads `.env` with `override=True` (the file
+  wins over shell vars). A fresh `cp .env.example .env` is a plain file; if you
+  adopt the optional dual-profile setup, `bash scripts/use_env.sh {status|cloud|local|both}`
+  turns `.env` into a symlink to `.env.local`/`.env.cloud` — switch profiles with
+  that script rather than editing the symlink target directly.
 - **Re-running `setup_datasets.py` duplicates items** (items have no stable ids).
   Seed once; use `--dry-run` to preview. `promote_trace_to_dataset.py` upserts and
   is safe to re-run.

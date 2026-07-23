@@ -619,7 +619,7 @@ repo already uses (no extra login), and neither is required to run the gate.
   npx langfuse-cli --env .env api traces list --limit 10 # recent gate-run traces
   npx langfuse-cli --env .env api prompts list           # managed prompts
   ```
-  (Install once with `npm i -g langfuse-cli` to drop the `npx` prefix.)
+  (Install once with `npm i -g langfuse-cli`, then call it as `langfuse api …`.)
 - **[Langfuse agent skill](https://langfuse.com/docs/api-and-data-platform/features/agent-skill)** — an Agent-Skills-standard skill (Claude Code, Cursor, Windsurf…) that teaches an agent Langfuse best practices and drives the CLI: query traces, build datasets, migrate prompts. Add it with `npx skills add langfuse/skills --skill "langfuse"`.
 
 See [`AGENTS.md`](AGENTS.md) for how these fit the end-to-end agentic workflow.
