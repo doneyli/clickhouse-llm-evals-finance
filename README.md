@@ -536,6 +536,8 @@ The UI is a React SPA built with [Click UI](https://clickhouse.design/click-ui),
 
 The dashboard is a **latest-run-per-(dataset, model) matrix**: for each dataset it shows the newest run of every `metadata.model` value — plain models, `--label` variants (e.g. `claude-opus-4-7-finance-expert`), and agents (`usecase:10k-analyst`) each get their own row. Each row's *primary score* is picked per run — `avg_numerical_accuracy` if present, else `avg_sentiment_accuracy`, `avg_groundedness`, `avg_exact_match`, `avg_completeness`, or the first other `avg_*` score — and labeled with the metric name.
 
+The **Threshold** column shows the bar that run was judged against, read from the run's own metadata so a historical run displays the bar that was in force when it ran, not whatever the gate config says today. A model run records one scalar bar (`metadata.threshold`). An agent run records one bar per dimension (`metadata.gate_thresholds`) and *all* of them must clear, so the column shows the bar for the score in that row plus how many dimensions stand behind the verdict (`of 4 gate dims`, with the full gate on hover) — **Details** lists every dimension against its own bar. A run that recorded no bar shows `—` rather than a number nothing was judged against.
+
 ### Running the portal
 
 ```bash
@@ -561,7 +563,7 @@ cd portal/frontend && npm run dev        # http://localhost:5173
 | Page | URL | Description |
 |------|-----|-------------|
 | Dashboard | `/` | Gate matrix — which models pass/fail against which datasets |
-| Breakdown | `/breakdown/{dataset}/{run}` | Evaluator scores (bar chart + table) for a specific run |
+| Breakdown | `/breakdown/{dataset}/{run}` | Evaluator scores (bar chart + table) for a specific run — for an agent run, each dimension against its own gate bar |
 | History | `/history/{dataset}` | Timeline of all runs with trend chart |
 | Run Detail | `/run/{dataset}/{run}` | Per-item scores with links to Langfuse traces |
 

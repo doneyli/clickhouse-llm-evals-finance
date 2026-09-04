@@ -23,10 +23,12 @@ import PageHeader from "../components/PageHeader";
 import ProvenanceStrip from "../components/ProvenanceStrip";
 import ScoreBar from "../components/ScoreBar";
 import StatusBadge from "../components/StatusBadge";
+import ThresholdCell from "../components/ThresholdCell";
 import { api } from "../lib/api";
 import { useChartTheme } from "../lib/chartTheme";
 import { datasetLabel } from "../lib/datasets";
 import { datetime, metricLabel, shortDate } from "../lib/format";
+import { barPct } from "../lib/gate";
 import type { HistoryRun } from "../types";
 
 const headers: TableColumnConfigProps[] = [
@@ -76,9 +78,10 @@ function tableRow(dataset: string, run: HistoryRun): TableRowType {
       },
       {
         label: (
-          <span className="mono" style={{ fontSize: 13 }}>
-            {Math.round(run.threshold * 100)}%
-          </span>
+          <ThresholdCell
+            threshold={run.threshold}
+            gate={run.gate_thresholds}
+          />
         ),
       },
       {
@@ -138,8 +141,16 @@ export default function History() {
               metric: metricLabel(r.primary_score.name),
             }));
 
-          const threshold =
-            runs.length > 0 ? Math.round(runs[0].threshold * 100) : 85;
+          // The trend plots each run's primary score, so the only honest
+          // reference line is the bar that score was judged against — taken
+          // from the latest run, and named, because an agent gate has three or
+          // four more bars behind its verdict (all of them on Details).
+          const latest = runs[0];
+          const bar = latest?.threshold ?? null;
+          const barLabel =
+            bar !== null
+              ? `${metricLabel(latest.primary_score.name) || "score"} ≥ ${barPct(bar)}`
+              : "";
 
           return (
             <>
@@ -182,17 +193,19 @@ export default function History() {
                           domain={[0, 100]}
                           tickFormatter={(v) => `${v}%`}
                         />
-                        <ReferenceLine
-                          y={threshold}
-                          stroke={chart.threshold}
-                          strokeDasharray="4 4"
-                          label={{
-                            value: `Threshold ${threshold}%`,
-                            fill: chart.threshold,
-                            fontSize: 11,
-                            position: "insideTopRight",
-                          }}
-                        />
+                        {bar !== null && (
+                          <ReferenceLine
+                            y={bar * 100}
+                            stroke={chart.threshold}
+                            strokeDasharray="4 4"
+                            label={{
+                              value: barLabel,
+                              fill: chart.threshold,
+                              fontSize: 11,
+                              position: "insideTopRight",
+                            }}
+                          />
+                        )}
                         <Tooltip
                           contentStyle={{
                             background: chart.tooltipBg,

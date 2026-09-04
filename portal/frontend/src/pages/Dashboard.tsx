@@ -16,6 +16,7 @@ import PageHeader from "../components/PageHeader";
 import ProvenanceStrip from "../components/ProvenanceStrip";
 import ScoreBar from "../components/ScoreBar";
 import StatusBadge from "../components/StatusBadge";
+import ThresholdCell from "../components/ThresholdCell";
 import { api } from "../lib/api";
 import { datasetLabel } from "../lib/datasets";
 import { metricLabel, shortDate } from "../lib/format";
@@ -60,9 +61,10 @@ function tableRow(row: DashboardRow): TableRowType {
       },
       {
         label: (
-          <span className="mono" style={{ fontSize: 13 }}>
-            {Math.round(row.threshold * 100)}%
-          </span>
+          <ThresholdCell
+            threshold={row.threshold}
+            gate={row.gate_thresholds}
+          />
         ),
       },
       {
