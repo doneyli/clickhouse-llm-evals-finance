@@ -11,13 +11,24 @@ export interface PrimaryScore {
   value: number | null;
 }
 
+/**
+ * An agent gate's per-dimension bars, e.g.
+ * `{ groundedness: 0.8, regulatory_compliance: 1.0 }`. Every dimension must
+ * clear its own bar, so this never collapses into a single number. Model
+ * certification runs have no gate dict — they carry a scalar `threshold`.
+ */
+export type GateThresholds = Record<string, number>;
+
 export interface DashboardRow {
   model: string;
   dataset: string;
   dataset_short: string;
   status: CertStatus;
   primary_score: PrimaryScore;
-  threshold: number;
+  /** Bar for `primary_score` — the model scalar, or the matching gate
+   *  dimension's bar; null when the run recorded no bar for that score. */
+  threshold: number | null;
+  gate_thresholds: GateThresholds | null;
   run_name: string;
   timestamp: string;
   cert_comment: string;
@@ -28,7 +39,9 @@ export interface HistoryRun {
   model: string;
   status: CertStatus;
   primary_score: PrimaryScore;
-  threshold: number;
+  /** Bar for `primary_score`; see `DashboardRow.threshold`. */
+  threshold: number | null;
+  gate_thresholds: GateThresholds | null;
   timestamp: string;
   cert_comment: string;
 }
@@ -55,7 +68,9 @@ export interface RunDetail {
   dataset_short: string;
   run_name: string;
   model: string;
-  threshold: number;
+  /** Scalar bar of a model gate; null for agent runs (see gate_thresholds). */
+  threshold: number | null;
+  gate_thresholds: GateThresholds | null;
   status: CertStatus;
   total_items: number;
   aggregates: Record<string, ScoreAggregate>;
